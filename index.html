@@ -31,14 +31,18 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            /* Prevents scrollbar */
+            overflow-x: hidden; 
+            box-sizing: border-box;
         }
 
         h3 {
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin: 0 0 4px 0;
             opacity: 0.5;
+            font-weight: 700;
         }
 
         .input-group {
@@ -55,7 +59,6 @@
             border-radius: var(--radius);
             font-size: 14px;
             outline: none;
-            transition: ring 0.2s;
         }
 
         input[type="text"]:focus {
@@ -96,7 +99,6 @@
             flex-grow: 1;
             margin: 0 10px;
             font-size: 14px;
-            transition: all 0.3s ease;
         }
 
         .completed .task-text {
@@ -117,21 +119,18 @@
             color: var(--danger);
             cursor: pointer;
             font-size: 16px;
-            opacity: 0;
-            transition: opacity 0.2s;
+            opacity: 0.4;
             padding: 4px;
         }
 
-        li:hover .delete-btn { opacity: 0.7; }
-        .delete-btn:hover { opacity: 1 !important; }
-
+        li:hover .delete-btn { opacity: 1; }
     </style>
 </head>
 <body>
 
     <h3>Daily Focus</h3>
     <div class="input-group">
-        <input type="text" id="taskInput" placeholder="What's the goal?" autocomplete="off">
+        <input type="text" id="taskInput" placeholder="Add a goal..." autocomplete="off">
         <button class="add-btn" onclick="addTask()">Add</button>
     </div>
     <ul id="taskList"></ul>
@@ -143,16 +142,19 @@
         function checkDailyReset() {
             const lastDate = localStorage.getItem('lastResetDate');
             const today = new Date().toDateString();
+
+            // If the stored date is different from today's date, wipe the goals
             if (lastDate !== today) {
-                localStorage.removeItem('goals');
-                localStorage.setItem('lastResetDate', today);
+                localStorage.removeItem('goals'); // This clears the list
+                localStorage.setItem('lastResetDate', today); // Updates to the new day
             }
         }
 
         function loadTasks() {
-            checkDailyReset();
+            checkDailyReset(); // Run the check before drawing the list
             const goals = JSON.parse(localStorage.getItem('goals') || '[]');
             taskList.innerHTML = '';
+            
             goals.forEach((goal, index) => {
                 const li = document.createElement('li');
                 if (goal.completed) li.classList.add('completed');
@@ -192,7 +194,11 @@
 
         taskInput.addEventListener("keypress", (e) => { if (e.key === "Enter") addTask(); });
 
+        // Initial Load
         loadTasks();
+
+        // Optional: Check for date change every minute in case you leave Notion open overnight
+        setInterval(loadTasks, 60000);
     </script>
 </body>
 </html>
